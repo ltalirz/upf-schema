@@ -4,6 +4,9 @@
   <!-- Definition of elements -->
 
   <xs:element name="UPF">
+    <xs:annotation>
+      <xs:documentation>Root section</xs:documentation> 
+    </xs:annotation>
     <xs:complexType>
       <xs:sequence>
         <xs:element ref="PP_INFO" minOccurs="0"/>
@@ -19,9 +22,20 @@
     </xs:complexType>
   </xs:element>
 
-  <xs:element name="PP_INFO" type="xs:string"/>
+  <xs:element name="PP_INFO" type="xs:string">
+    <xs:annotation>
+      <xs:documentation>
+        For human-readable data (ignored by QE).
+      </xs:documentation> 
+    </xs:annotation>
+  </xs:element>
 
   <xs:element name="PP_HEADER">
+    <xs:annotation>
+      <xs:documentation>
+        Machine-readable minimal data on the pseudopotential.
+      </xs:documentation> 
+    </xs:annotation>
     <xs:complexType>
       <xs:attribute name="element" use="required" type="upf-element">
         <xs:annotation>
@@ -277,6 +291,11 @@
   </xs:element>
 
   <xs:element name="PP_MESH">
+    <xs:annotation>
+      <xs:documentation>
+        Defines the mesh.
+      </xs:documentation> 
+    </xs:annotation>
     <xs:complexType>
       <xs:sequence>
         <xs:element ref="PP_R"/>
