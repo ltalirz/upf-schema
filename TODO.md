@@ -1,0 +1,2 @@
+- Continue translating format (got approx. up to PP_BETA.n)
+- Modify XSLT file (or write our own)
