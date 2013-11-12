@@ -14,6 +14,7 @@
         <xs:element ref="PP_MESH"/>
         <xs:element ref="PP_NLCC" minOccurs="0"/>
         <xs:element ref="PP_LOCAL"/>
+        <xs:element ref="PP_SEMILOCAL" minOccurs="0"/>
         <xs:element ref="PP_NONLOCAL"/>
         <xs:element ref="PP_PSWFC"/>
         <xs:element ref="PP_FULL_WFC" minOccurs="0"/>
@@ -420,6 +421,33 @@
     </xs:annotation>
   </xs:element>
 
+  <xs:element name="PP_SEMILOCAL">
+    <xs:annotation>
+      <xs:documentation>
+        Contains number_of_proj subsections PP_VNL for PPs in semilocal form.
+        Not used by QE.
+      </xs:documentation> 
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="PP_VNL.1" minOccurs="0" maxOccurs="1"
+                    type="upf-PP_VNL.n"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="upf-PP_VNL.n">
+    <xs:annotation>
+      <xs:documentation>
+        Contains the pseudopotential for l and j specified in the attribute
+        list.
+      </xs:documentation> 
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="upf-data-section">
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
 
   <xs:element name="PP_NONLOCAL">
     <xs:annotation>
@@ -556,6 +584,8 @@
       <xs:sequence>
         <xs:element ref="PP_Q"/>
         <xs:element ref="PP_MULTIPOLES"/>
+        <xs:element ref="PP_QFCOEFF"/>
+        <xs:element ref="PP_RINNER"/>
         <xs:element name="PP_QIJL.1.1.0" minOccurs="0" maxOccurs="1"
                     type="upf-PP_QIJL.n.n.n"/>
       </xs:sequence>
@@ -663,25 +693,72 @@
     </xs:complexType>
   </xs:element>
 
-  <xs:element name="PP_Q">
-    <xs:complexType mixed="true">
-      <xs:attribute name="columns" use="required" type="xs:integer"/>
-      <xs:attribute name="size" use="required" type="xs:integer"/>
-      <xs:attribute name="type" use="required" type="xs:NCName"/>
-    </xs:complexType>
+  <xs:element name="PP_Q" type="upf-data-section">
+    <xs:annotation>
+      <xs:documentation>
+        The norm of the augmentation functions.
+
+        Note: The fact that Q is zero for a certain augmentation function
+        does not guarantee that the function will be identically zero.
+        This was erroneously assumed in UPF 2.0.0, causing small errors
+        in specific cases.
+      </xs:documentation> 
+    </xs:annotation>
   </xs:element>
-  <xs:element name="PP_MULTIPOLES">
-    <xs:complexType mixed="true">
-      <xs:attribute name="columns" use="required" type="xs:integer"/>
-      <xs:attribute name="size" use="required" type="xs:integer"/>
-      <xs:attribute name="type" use="required" type="xs:NCName"/>
-    </xs:complexType>
+
+  <xs:element name="PP_MULTIPOLES" type="upf-data-section">
+    <xs:annotation>
+      <xs:documentation>
+        The electrostatic multipoles of the corresponding augmentation channel.
+        If the absolute value of a multipole is less than augmentation_epsilon,
+        the corresponding function will be considered zero.
+
+        Note: This section is compulsory for PAW and ignored otherwise.
+      </xs:documentation> 
+    </xs:annotation>
+  </xs:element>
+
+  <xs:element name="PP_QFCOEFF" type="upf-data-section">
+    <xs:annotation>
+      <xs:documentation>
+        The coefficient used to perform a Taylor expansion of the augmentation
+        functions at small radii.
+
+        Note: Compulsory if nqf &gt; 0, ignored otherwise.
+      </xs:documentation> 
+    </xs:annotation>
+  </xs:element>
+
+  <xs:element name="PP_RINNER" type="upf-data-section">
+    <xs:annotation>
+      <xs:documentation>
+        The radius before which the augmentation functions are expanded in a
+        Taylor series.
+      </xs:documentation> 
+    </xs:annotation>
   </xs:element>
 
   <xs:complexType name="upf-PP_QIJL.n.n.n">
     <xs:annotation>
       <xs:documentation>
-        To be documented.
+        If q_with_l is true, there needs to be one PP_Q.i.j.l section
+        for each i and j from 1 to number_of_proj and l from 0 to l_max_rho.
+        If q_with_l is false, there needs to be one PP_Q.i.j section
+        for each i and j from 1 to number_of_proj.
+
+        An augmentation function can be omitted (or replaced with an empty
+        section of the same name), if at least one of the following conditions
+        is met:
+         
+          - It is identically zero. In this case, an empty section must be 
+            present (see is_null).
+          - j &lt; i (Q_ij = Q_ji due to symmetry).
+          - The pseudo is of PAW type and the corresponding multipole
+            (PP_MULTIPOLES) is zero or less than augmentation_epsilon
+          - q_with_l is true and l is *not* taken from the list
+            abs(l_i-l_j), abs(l_i-l_j)+2 ... l_i+l_j-2, l_i+l_j .
+
+        Unnecessary sections with augmentation charges are ignored.
       </xs:documentation> 
     </xs:annotation>
     <xs:complexContent>
@@ -693,14 +770,40 @@
             </xs:documentation> 
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="composite_index" use="required" type="xs:integer"/>
-        <xs:attribute name="first_index" use="required" type="xs:integer"/>
-        <xs:attribute name="second_index" use="required" type="xs:integer"/>
+        <xs:attribute name="first_index" use="optional" type="xs:integer">
+          <xs:annotation>
+            <xs:documentation>
+              The index i of the function.
+            </xs:documentation> 
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="second_index" use="optional" type="xs:integer">
+          <xs:annotation>
+            <xs:documentation>
+              The index j of the function.
+            </xs:documentation> 
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="composite_index" use="optional" type="xs:integer">
+          <xs:annotation>
+            <xs:documentation>
+              A composite index k = j*(J-1)/2 + i, 
+              used internally to save memory.
+            </xs:documentation> 
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="is_null" use="optional" type="upf-logical">
+          <xs:annotation>
+            <xs:documentation>
+              If an augmentation function is identically zero,
+              the data section can be replaced by an empty section
+              that is_null.
+            </xs:documentation> 
+          </xs:annotation>
+        </xs:attribute>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-
-
 
 
 
