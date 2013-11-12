@@ -16,7 +16,9 @@
         <xs:element ref="PP_LOCAL"/>
         <xs:element ref="PP_NONLOCAL"/>
         <xs:element ref="PP_PSWFC"/>
+        <xs:element ref="PP_FULL_WFC" minOccurs="0"/>
         <xs:element ref="PP_RHOATOM"/>
+        <xs:element ref="PP_PAW" minOccurs="0"/>
       </xs:sequence>
       <xs:attribute name="version" use="required" type="upf-version-string"/>
     </xs:complexType>
@@ -424,127 +426,189 @@
       <xs:sequence>
         <xs:element name="PP_BETA.1" minOccurs="0" maxOccurs="1"
                     type="upf-PP_BETA.n"/>
+        <xs:element name="PP_BETA.2" minOccurs="0" maxOccurs="1"
+                    type="upf-PP_BETA.n"/>
+        <xs:element name="PP_BETA.3" minOccurs="0" maxOccurs="1"
+                    type="upf-PP_BETA.n"/>
+        <xs:element name="PP_BETA.4" minOccurs="0" maxOccurs="1"
+                    type="upf-PP_BETA.n"/>
         <xs:element ref="PP_DIJ"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
 
-  <xs:complexType name="upf-PP_BETA.n" mixed="true">
-    <xs:attribute name="index" use="optional" type="xs:integer">
-      <xs:annotation>
-        <xs:documentation>
-          For PP_BETA.n, this is just n.
-          
-          TODO do away with the PP_BETA.n naming scheme.
-        </xs:documentation> 
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="angular_momentum" use="required" type="xs:integer">
-      <xs:annotation>
-        <xs:documentation>
-          The angular momentum of the projector.
-        </xs:documentation> 
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="cutoff_radius_index" use="optional" type="xs:integer">
-      <xs:annotation>
-        <xs:documentation>
-          The projector is assumed to be zero beyond this point.
-          If it is not specified, it is assumed to be equal to the mesh size.
-          
-          NOTE: Not specifying cutoff_radius can introduce a considerable
-          numerical noise in some integrals, especially in the PAW case.
-        </xs:documentation> 
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="cutoff_radius" use="optional" type="xs:double">
-      <xs:annotation>
-        <xs:documentation>
-          The value of the radial mesh point corresponding to cutoff_radius_index.
-          This value is currently unused in the plane-wave code.
-        </xs:documentation> 
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="norm_conserving_radius" use="optional" type="xs:double">
-      <xs:annotation>
-        <xs:documentation>
-          Value of norm conserving wave function used to generate the 
-          ultrasoft pseudopotential. 
-          Ununsed in the code, stored only for reconstruction purposes,
-          meaningless for PAW.
-        </xs:documentation> 
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="ultrasoft_cutoff_radius" use="required" type="xs:double">
-      <xs:annotation>
-        <xs:documentation>
-          UNDOCUMENTED
-        </xs:documentation> 
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="label" use="required" type="xs:NMTOKEN">
-      <xs:annotation>
-        <xs:documentation>
-          UNDOCUMENTED
-        </xs:documentation> 
-      </xs:annotation>
-    </xs:attribute>
-
-    <xs:attribute name="columns" use="required" type="xs:integer"/>
-    <xs:attribute name="size" use="required" type="xs:integer"/>
-    <xs:attribute name="type" use="required" type="xs:NCName"/>
+  <xs:complexType name="upf-PP_BETA.n">
+    <xs:complexContent>
+      <xs:extension base="upf-data-section">
+        <xs:attribute name="index" use="optional" type="xs:integer">
+          <xs:annotation>
+            <xs:documentation>
+              For PP_BETA.n, this is just n.
+              
+              TODO do away with the PP_BETA.n naming scheme.
+            </xs:documentation> 
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="angular_momentum" use="required" type="xs:integer">
+          <xs:annotation>
+            <xs:documentation>
+              The angular momentum of the projector.
+            </xs:documentation> 
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="cutoff_radius_index" use="optional" type="xs:integer">
+          <xs:annotation>
+            <xs:documentation>
+              The projector is assumed to be zero beyond this point.
+              If it is not specified, it is assumed to be equal to the mesh size.
+              
+              NOTE: Not specifying cutoff_radius can introduce a considerable
+              numerical noise in some integrals, especially in the PAW case.
+            </xs:documentation> 
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="cutoff_radius" use="optional" type="xs:double">
+          <xs:annotation>
+            <xs:documentation>
+              The value of the radial mesh point corresponding to cutoff_radius_index.
+              This value is currently unused in the plane-wave code.
+            </xs:documentation> 
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="norm_conserving_radius" use="optional" type="xs:double">
+          <xs:annotation>
+            <xs:documentation>
+              Value of norm conserving wave function used to generate the 
+              ultrasoft pseudopotential. 
+              Ununsed in the code, stored only for reconstruction purposes,
+              meaningless for PAW.
+            </xs:documentation> 
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="ultrasoft_cutoff_radius" use="required" type="xs:double">
+          <xs:annotation>
+            <xs:documentation>
+              UNDOCUMENTED
+            </xs:documentation> 
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="label" use="required" type="xs:NMTOKEN">
+          <xs:annotation>
+            <xs:documentation>
+              UNDOCUMENTED
+            </xs:documentation> 
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
-  <xs:element name="PP_DIJ">
-    <xs:complexType>
-      <xs:simpleContent>
-        <xs:extension base="xs:double">
-          <xs:attribute name="columns" use="required" type="xs:integer"/>
-          <xs:attribute name="size" use="required" type="xs:integer"/>
-          <xs:attribute name="type" use="required" type="xs:NCName"/>
-        </xs:extension>
-      </xs:simpleContent>
-    </xs:complexType>
-  </xs:element>
-  <xs:element name="PP_PSWFC">
+    <xs:element name="PP_DIJ">
+      <xs:complexType>
+        <xs:simpleContent>
+          <xs:extension base="xs:double">
+            <xs:attribute name="columns" use="required" type="xs:integer"/>
+            <xs:attribute name="size" use="required" type="xs:integer"/>
+            <xs:attribute name="type" use="required" type="xs:NCName"/>
+          </xs:extension>
+        </xs:simpleContent>
+      </xs:complexType>
+    </xs:element>
+    <xs:element name="PP_PSWFC">
+      <xs:complexType>
+        <xs:sequence>
+          <xs:element ref="PP_CHI.1"/>
+          <xs:element ref="PP_CHI.2"/>
+        </xs:sequence>
+      </xs:complexType>
+    </xs:element>
+    <xs:element name="PP_CHI.1">
+      <xs:complexType mixed="true">
+        <xs:attribute name="columns" use="required" type="xs:integer"/>
+        <xs:attribute name="cutoff_radius" use="required" type="xs:double"/>
+        <xs:attribute name="index" use="required" type="xs:integer"/>
+        <xs:attribute name="l" use="required" type="xs:integer"/>
+        <xs:attribute name="label" use="required" type="xs:NMTOKEN"/>
+        <xs:attribute name="n" use="required" type="xs:integer"/>
+        <xs:attribute name="occupation" use="required" type="xs:double"/>
+        <xs:attribute name="pseudo_energy" use="required" type="xs:double"/>
+        <xs:attribute name="size" use="required" type="xs:integer"/>
+        <xs:attribute name="type" use="required" type="xs:NCName"/>
+        <xs:attribute name="ultrasoft_cutoff_radius" use="required" type="xs:double"/>
+      </xs:complexType>
+    </xs:element>
+    <xs:element name="PP_CHI.2">
+      <xs:complexType mixed="true">
+        <xs:attribute name="columns" use="required" type="xs:integer"/>
+        <xs:attribute name="cutoff_radius" use="required" type="xs:double"/>
+        <xs:attribute name="index" use="required" type="xs:integer"/>
+        <xs:attribute name="l" use="required" type="xs:integer"/>
+        <xs:attribute name="label" use="required" type="xs:NMTOKEN"/>
+        <xs:attribute name="n" use="required" type="xs:integer"/>
+        <xs:attribute name="occupation" use="required" type="xs:double"/>
+        <xs:attribute name="pseudo_energy" use="required" type="xs:double"/>
+        <xs:attribute name="size" use="required" type="xs:integer"/>
+        <xs:attribute name="type" use="required" type="xs:NCName"/>
+        <xs:attribute name="ultrasoft_cutoff_radius" use="required" type="xs:double"/>
+      </xs:complexType>
+    </xs:element>
+
+
+ <xs:element name="PP_FULL_WFC">
     <xs:complexType>
       <xs:sequence>
-        <xs:element ref="PP_CHI.1"/>
-        <xs:element ref="PP_CHI.2"/>
+        <xs:element name="PP_AEWFC.1" minOccurs="0" maxOccurs="1"
+                    type="upf-PP_AEWFC.n"/>
       </xs:sequence>
+      <xs:attribute name="number_of_wfc" use="required" type="xs:integer"/>
     </xs:complexType>
   </xs:element>
-  <xs:element name="PP_CHI.1">
+
+  <xs:complexType name="upf-PP_AEWFC.n">
+    <xs:complexContent>
+      <xs:extension base="upf-data-section">
+        <xs:attribute name="index" use="required" type="xs:integer"/>
+        <xs:attribute name="l" use="required" type="xs:integer"/>
+        <xs:attribute name="label" use="required" type="xs:NMTOKEN"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+    <xs:element name="PP_RHOATOM">
+      <xs:complexType mixed="true">
+        <xs:attribute name="columns" use="required" type="xs:integer"/>
+        <xs:attribute name="size" use="required" type="xs:integer"/>
+        <xs:attribute name="type" use="required" type="xs:NCName"/>
+      </xs:complexType>
+  </xs:element>
+
+
+ <xs:element name="PP_PAW">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="PP_OCCUPATIONS"/>
+        <xs:element ref="PP_AE_NLCC"/>
+        <xs:element ref="PP_AE_VLOC"/>
+      </xs:sequence>
+      <xs:attribute name="core_energy" use="required" type="xs:double"/>
+      <xs:attribute name="paw_data_format" use="required" type="xs:integer"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="PP_OCCUPATIONS">
     <xs:complexType mixed="true">
       <xs:attribute name="columns" use="required" type="xs:integer"/>
-      <xs:attribute name="cutoff_radius" use="required" type="xs:double"/>
-      <xs:attribute name="index" use="required" type="xs:integer"/>
-      <xs:attribute name="l" use="required" type="xs:integer"/>
-      <xs:attribute name="label" use="required" type="xs:NMTOKEN"/>
-      <xs:attribute name="n" use="required" type="xs:integer"/>
-      <xs:attribute name="occupation" use="required" type="xs:double"/>
-      <xs:attribute name="pseudo_energy" use="required" type="xs:double"/>
       <xs:attribute name="size" use="required" type="xs:integer"/>
       <xs:attribute name="type" use="required" type="xs:NCName"/>
-      <xs:attribute name="ultrasoft_cutoff_radius" use="required" type="xs:double"/>
     </xs:complexType>
   </xs:element>
-  <xs:element name="PP_CHI.2">
+  <xs:element name="PP_AE_NLCC">
     <xs:complexType mixed="true">
       <xs:attribute name="columns" use="required" type="xs:integer"/>
-      <xs:attribute name="cutoff_radius" use="required" type="xs:double"/>
-      <xs:attribute name="index" use="required" type="xs:integer"/>
-      <xs:attribute name="l" use="required" type="xs:integer"/>
-      <xs:attribute name="label" use="required" type="xs:NMTOKEN"/>
-      <xs:attribute name="n" use="required" type="xs:integer"/>
-      <xs:attribute name="occupation" use="required" type="xs:double"/>
-      <xs:attribute name="pseudo_energy" use="required" type="xs:double"/>
       <xs:attribute name="size" use="required" type="xs:integer"/>
       <xs:attribute name="type" use="required" type="xs:NCName"/>
-      <xs:attribute name="ultrasoft_cutoff_radius" use="required" type="xs:double"/>
     </xs:complexType>
   </xs:element>
-  <xs:element name="PP_RHOATOM">
+  <xs:element name="PP_AE_VLOC">
     <xs:complexType mixed="true">
       <xs:attribute name="columns" use="required" type="xs:integer"/>
       <xs:attribute name="size" use="required" type="xs:integer"/>
@@ -657,6 +721,8 @@
     </xs:restriction>
   </xs:simpleType>
  
+  <!-- For some reason, adding mixed="true" still doesn't allow for this
+       type to be extended by a mixed="true" type. -->
   <xs:complexType name="upf-data-section">
     <xs:simpleContent>
       <xs:extension base="xs:string">
