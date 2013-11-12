@@ -422,6 +422,11 @@
 
 
   <xs:element name="PP_NONLOCAL">
+    <xs:annotation>
+      <xs:documentation>
+        Content of this section depends on several settings in PP_HEADER.
+      </xs:documentation> 
+    </xs:annotation>
     <xs:complexType>
       <xs:sequence>
         <xs:element name="PP_BETA.1" minOccurs="0" maxOccurs="1"
@@ -432,12 +437,25 @@
                     type="upf-PP_BETA.n"/>
         <xs:element name="PP_BETA.4" minOccurs="0" maxOccurs="1"
                     type="upf-PP_BETA.n"/>
+        <xs:element name="PP_BETA.5" minOccurs="0" maxOccurs="1"
+                    type="upf-PP_BETA.n"/>
+        <xs:element name="PP_BETA.6" minOccurs="0" maxOccurs="1"
+                    type="upf-PP_BETA.n"/>
         <xs:element ref="PP_DIJ"/>
+        <xs:element ref="PP_AUGMENTATION" minOccurs="0"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
 
   <xs:complexType name="upf-PP_BETA.n">
+    <xs:annotation>
+      <xs:documentation>
+        Contains a Kleinman-Bylander projector sampled on the radial grid.
+
+        If number_of_proj > 0, there must be a PP_BETA.n section for each
+        n between 1 and number_of_proj.
+      </xs:documentation> 
+    </xs:annotation>
     <xs:complexContent>
       <xs:extension base="upf-data-section">
         <xs:attribute name="index" use="optional" type="xs:integer">
@@ -504,6 +522,16 @@
   </xs:complexType>
 
     <xs:element name="PP_DIJ">
+      <xs:annotation>
+        <xs:documentation>
+          Hamiltonian pseudo coefficients as defined in the Vanderbilt paper
+          (PRB 1990).
+          If the pseudopotential is a PAW data set, they must contain the
+          kinetic energy difference as well.
+
+          !!CHECK!! a better/more accurate definition for these would be useful.
+        </xs:documentation> 
+      </xs:annotation>
       <xs:complexType>
         <xs:simpleContent>
           <xs:extension base="xs:double">
@@ -514,6 +542,168 @@
         </xs:simpleContent>
       </xs:complexType>
     </xs:element>
+
+
+ <xs:element name="PP_AUGMENTATION">
+    <xs:annotation>
+      <xs:documentation>
+        Compulsory for pseudopotentials with augmentation charge,
+        i.e. when the pseudopotential is_ultrasoft
+        (presently ultrasoft or PAW).
+      </xs:documentation> 
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="PP_Q"/>
+        <xs:element ref="PP_MULTIPOLES"/>
+        <xs:element name="PP_QIJL.1.1.0" minOccurs="0" maxOccurs="1"
+                    type="upf-PP_QIJL.n.n.n"/>
+      </xs:sequence>
+      <xs:attribute name="q_with_l" use="required" type="upf-logical">
+          <xs:annotation>
+            <xs:documentation>
+              If true, the augmentation charge can depend on the value
+              of the angular momentum. I.e. if a certain channel has more
+              than one angular momentum component, there shall be a different
+              radial form of the augmentation for each component.
+
+             This attribute is false for Vanderbilt's original recipe.
+             It is true for PAW.
+            </xs:documentation> 
+          </xs:annotation>
+        </xs:attribute>
+      <xs:attribute name="nqf" use="optional" type="xs:integer">
+          <xs:annotation>
+            <xs:documentation>
+              Specifies the number of coefficients used to analytically expand
+              the augmentation charge at small radius,
+              according to Vanderbilt's recipe.
+
+              Note: The analytical expansion of augmentation charge is 
+              currently not implemented for PAW.
+            </xs:documentation> 
+          </xs:annotation>
+        </xs:attribute>
+      <xs:attribute name="nqlc" use="optional" type="xs:integer">
+          <xs:annotation>
+            <xs:documentation>
+              Specifies the number of angular momentum components that can be
+              present in the charge density, when the maximum angular momentum
+              for wave functions is l_max (default: nqlc = 2*l_max+1).
+ 
+              If nqf &gt; 0, nqlc is the dimension of several arrays.
+              If nqf = 0, nqlc is not used.
+            </xs:documentation> 
+          </xs:annotation>
+        </xs:attribute>
+      <xs:attribute name="shape" use="optional" type="upf-shortstring">
+          <xs:annotation>
+            <xs:documentation>
+              Describes the kind of pseudization used for the augmentation
+              function. Currently unused, stored only for reconstructio purpose.
+
+              Note: If the analytical overlap for PAW augmentation charge
+              (as defined by Bloechl) will ever be implemented, this field
+              will become necessary.
+            </xs:documentation> 
+          </xs:annotation>
+        </xs:attribute>
+      <xs:attribute name="iraug" use="optional" type="xs:integer">
+          <xs:annotation>
+            <xs:documentation>
+              All augmentation charge must be zero beyond this point.
+              Used only for PAW and only if it is greater than cutoff_radius
+              for all projectors.
+
+              If not specified, iraug is set to mesh size.
+              This default works, but can generate numerical noise in some
+              integrals. In order to avoid large round-off errors in 
+              cancellation of PAW terms, it is important to set this paramter
+              as small as possible, i.e. just outside the augmentation radius.
+            </xs:documentation> 
+          </xs:annotation>
+        </xs:attribute>
+      <xs:attribute name="raug" use="optional" type="xs:double">
+          <xs:annotation>
+            <xs:documentation>
+              The value of the radial mesh point corresponding to iraug.
+            </xs:documentation> 
+          </xs:annotation>
+        </xs:attribute>
+      <xs:attribute name="augmentation_epsilon" use="optional" type="xs:double">
+          <xs:annotation>
+            <xs:documentation>
+              If augmentation_epsilon &gt; 0, augmentation functions,
+              whose norm is less than augmentation_epsilon will be 
+              considered zero.
+            </xs:documentation> 
+          </xs:annotation>
+        </xs:attribute>
+      <xs:attribute name="cutoff_r" use="optional" type="xs:double">
+          <xs:annotation>
+            <xs:documentation>
+              Deprecated?
+            </xs:documentation> 
+          </xs:annotation>
+        </xs:attribute>
+      <xs:attribute name="cutoff_r_index" use="optional" type="xs:integer">
+          <xs:annotation>
+            <xs:documentation>
+              Deprecated?
+            </xs:documentation> 
+          </xs:annotation>
+        </xs:attribute>
+      <xs:attribute name="l_max_aug" use="optional" type="xs:integer">
+          <xs:annotation>
+            <xs:documentation>
+              Deprecated?
+            </xs:documentation> 
+          </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="PP_Q">
+    <xs:complexType mixed="true">
+      <xs:attribute name="columns" use="required" type="xs:integer"/>
+      <xs:attribute name="size" use="required" type="xs:integer"/>
+      <xs:attribute name="type" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="PP_MULTIPOLES">
+    <xs:complexType mixed="true">
+      <xs:attribute name="columns" use="required" type="xs:integer"/>
+      <xs:attribute name="size" use="required" type="xs:integer"/>
+      <xs:attribute name="type" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="upf-PP_QIJL.n.n.n">
+    <xs:annotation>
+      <xs:documentation>
+        To be documented.
+      </xs:documentation> 
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="upf-data-section">
+        <xs:attribute name="angular_momentum" use="required" type="xs:integer">
+          <xs:annotation>
+            <xs:documentation>
+              To be documented.
+            </xs:documentation> 
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="composite_index" use="required" type="xs:integer"/>
+        <xs:attribute name="first_index" use="required" type="xs:integer"/>
+        <xs:attribute name="second_index" use="required" type="xs:integer"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+
+
+
+
     <xs:element name="PP_PSWFC">
       <xs:complexType>
         <xs:sequence>
@@ -559,12 +749,24 @@
       <xs:sequence>
         <xs:element name="PP_AEWFC.1" minOccurs="0" maxOccurs="1"
                     type="upf-PP_AEWFC.n"/>
+        <xs:element name="PP_PSWFC.1" minOccurs="0" maxOccurs="1"
+                    type="upf-PP_PSWFC.n"/>
       </xs:sequence>
       <xs:attribute name="number_of_wfc" use="required" type="xs:integer"/>
     </xs:complexType>
   </xs:element>
 
   <xs:complexType name="upf-PP_AEWFC.n">
+    <xs:complexContent>
+      <xs:extension base="upf-data-section">
+        <xs:attribute name="index" use="required" type="xs:integer"/>
+        <xs:attribute name="l" use="required" type="xs:integer"/>
+        <xs:attribute name="label" use="required" type="xs:NMTOKEN"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="upf-PP_PSWFC.n">
     <xs:complexContent>
       <xs:extension base="upf-data-section">
         <xs:attribute name="index" use="required" type="xs:integer"/>
