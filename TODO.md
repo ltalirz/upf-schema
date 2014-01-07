@@ -1,2 +1,3 @@
-- Continue translating format (got approx. up to PP_BETA.n)
+- Validate against PP files, finding errors
+- Go through the xsd file once again
 - Modify XSLT file (or write our own)
