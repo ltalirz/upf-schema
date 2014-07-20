@@ -29,11 +29,10 @@ Problems encountered during translation
 - attributes 'index', 'l', 'label'  in 'PP_AEWFC.n' and 'PP_PSWFC.n'
   Present in Pt.pbe-n-kjpaw_psl.0.1.UPF, but not documented in ODT file
 
-- sections 'PP_GIPAW_CORE_ORBITAL.n' and 'PP_GIPAW_ORBITAL.n' 
-  have no documented 'index' attribute
-
 - section 'PP_GIPAW_CORE_ORBITAL.n' appears twice in ODT file
   duplicate?
+
+- section 'PP_QIJ' is not documented in ODT file
 
 - literals for boolean variables given in ODT file are '.true.' and '.false.'
   In C.pbe-hgh.UPF they are 'T' and 'F'

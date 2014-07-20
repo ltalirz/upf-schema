@@ -430,13 +430,13 @@
     </xs:annotation>
     <xs:complexType>
       <xs:sequence>
-        <xs:element name="PP_VNL.1" minOccurs="0" maxOccurs="1"
-                    type="upf-PP_VNL.n"/>
+        <xs:element name="PP_VNL" minOccurs="0" maxOccurs="unbounded"
+                    type="upf-PP_VNL"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
 
-  <xs:complexType name="upf-PP_VNL.n">
+  <xs:complexType name="upf-PP_VNL">
     <xs:annotation>
       <xs:documentation>
         Contains the pseudopotential for l and j specified in the attribute
@@ -445,6 +445,27 @@
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="upf-data-section">
+        <xs:attribute name="index" use="required" type="xs:integer">
+          <xs:annotation>
+            <xs:documentation>
+              Enumerating index.
+            </xs:documentation> 
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="L" use="optional" type="xs:integer">
+          <xs:annotation>
+            <xs:documentation>
+              Orbital angular momentum l.
+            </xs:documentation> 
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="J" use="optional" type="xs:double">
+          <xs:annotation>
+            <xs:documentation>
+              Total angular momentum j (fully relativistic case only).
+            </xs:documentation> 
+          </xs:annotation>
+        </xs:attribute>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -457,41 +478,30 @@
     </xs:annotation>
     <xs:complexType>
       <xs:sequence>
-        <xs:element name="PP_BETA.1" minOccurs="0" maxOccurs="1"
-                    type="upf-PP_BETA.n"/>
-        <xs:element name="PP_BETA.2" minOccurs="0" maxOccurs="1"
-                    type="upf-PP_BETA.n"/>
-        <xs:element name="PP_BETA.3" minOccurs="0" maxOccurs="1"
-                    type="upf-PP_BETA.n"/>
-        <xs:element name="PP_BETA.4" minOccurs="0" maxOccurs="1"
-                    type="upf-PP_BETA.n"/>
-        <xs:element name="PP_BETA.5" minOccurs="0" maxOccurs="1"
-                    type="upf-PP_BETA.n"/>
-        <xs:element name="PP_BETA.6" minOccurs="0" maxOccurs="1"
-                    type="upf-PP_BETA.n"/>
+        <xs:element name="PP_BETA" minOccurs="0" maxOccurs="unbounded"
+                    type="upf-PP_BETA"/>
         <xs:element ref="PP_DIJ"/>
         <xs:element ref="PP_AUGMENTATION" minOccurs="0"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
 
-  <xs:complexType name="upf-PP_BETA.n">
+  <xs:complexType name="upf-PP_BETA">
     <xs:annotation>
       <xs:documentation>
         Contains a Kleinman-Bylander projector sampled on the radial grid.
 
-        If number_of_proj > 0, there must be a PP_BETA.n section for each
-        n between 1 and number_of_proj.
+        If number_of_proj > 0, there must be a PP_BETA section for each
+        number between 1 and number_of_proj.
       </xs:documentation> 
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="upf-data-section">
-        <xs:attribute name="index" use="optional" type="xs:integer">
+        <xs:attribute name="index" use="required" type="xs:integer">
           <xs:annotation>
             <xs:documentation>
-              For PP_BETA.n, this is just n.
-              
-              TODO do away with the PP_BETA.n naming scheme.
+              Index enumerating the beta projectors, ranging from 1
+              to number_of_proj.
             </xs:documentation> 
           </xs:annotation>
         </xs:attribute>
@@ -586,8 +596,10 @@
         <xs:element ref="PP_MULTIPOLES"/>
         <xs:element ref="PP_QFCOEFF"/>
         <xs:element ref="PP_RINNER"/>
-        <xs:element name="PP_QIJL.1.1.0" minOccurs="0" maxOccurs="1"
-                    type="upf-PP_QIJL.n.n.n"/>
+        <xs:element name="PP_QIJ" minOccurs="0" maxOccurs="unbounded"
+                    type="upf-PP_QIJ"/>
+        <xs:element name="PP_QIJL" minOccurs="0" maxOccurs="unbounded"
+                    type="upf-PP_QIJL"/>
       </xs:sequence>
       <xs:attribute name="q_with_l" use="required" type="upf-logical">
           <xs:annotation>
@@ -738,13 +750,68 @@
     </xs:annotation>
   </xs:element>
 
-  <xs:complexType name="upf-PP_QIJL.n.n.n">
+  <xs:complexType name="upf-PP_QIJ">
     <xs:annotation>
       <xs:documentation>
-        If q_with_l is true, there needs to be one PP_Q.i.j.l section
-        for each i and j from 1 to number_of_proj and l from 0 to l_max_rho.
-        If q_with_l is false, there needs to be one PP_Q.i.j section
+        If q_with_l is false, there needs to be one PP_QIJ section
         for each i and j from 1 to number_of_proj.
+
+        An augmentation function can be omitted (or replaced with an empty
+        section of the same name), if at least one of the following conditions
+        is met:
+         
+          - It is identically zero. In this case, an empty section must be 
+            present (see is_null).
+          - j &lt; i (Q_ij = Q_ji due to symmetry).
+          - The pseudo is of PAW type and the corresponding multipole
+            (PP_MULTIPOLES) is zero or less than augmentation_epsilon
+
+        Unnecessary sections with augmentation charges are ignored.
+      </xs:documentation> 
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="upf-data-section">
+        <xs:attribute name="first_index" use="required" type="xs:integer">
+          <xs:annotation>
+            <xs:documentation>
+              The index i of the function.
+            </xs:documentation> 
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="second_index" use="required" type="xs:integer">
+          <xs:annotation>
+            <xs:documentation>
+              The index j of the function.
+            </xs:documentation> 
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="composite_index" use="required" type="xs:integer">
+          <xs:annotation>
+            <xs:documentation>
+              A composite index k = j*(J-1)/2 + i, 
+              used internally to save memory.
+            </xs:documentation> 
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="is_null" use="optional" type="upf-logical">
+          <xs:annotation>
+            <xs:documentation>
+              If an augmentation function is identically zero,
+              the data section can be replaced by an empty section
+              that is_null.
+            </xs:documentation> 
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+
+  <xs:complexType name="upf-PP_QIJL">
+    <xs:annotation>
+      <xs:documentation>
+        If q_with_l is true, there needs to be one PP_QIJL section
+        for each i and j from 1 to number_of_proj and l from 0 to l_max_rho.
 
         An augmentation function can be omitted (or replaced with an empty
         section of the same name), if at least one of the following conditions
@@ -763,24 +830,24 @@
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="upf-data-section">
-        <xs:attribute name="angular_momentum" use="required" type="xs:integer">
-          <xs:annotation>
-            <xs:documentation>
-              To be documented.
-            </xs:documentation> 
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="first_index" use="optional" type="xs:integer">
+        <xs:attribute name="first_index" use="required" type="xs:integer">
           <xs:annotation>
             <xs:documentation>
               The index i of the function.
             </xs:documentation> 
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="second_index" use="optional" type="xs:integer">
+        <xs:attribute name="second_index" use="required" type="xs:integer">
           <xs:annotation>
             <xs:documentation>
               The index j of the function.
+            </xs:documentation> 
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="angular_momentum" use="required" type="xs:integer">
+          <xs:annotation>
+            <xs:documentation>
+              To be documented.
             </xs:documentation> 
           </xs:annotation>
         </xs:attribute>
@@ -817,15 +884,13 @@
       </xs:annotation>
       <xs:complexType>
         <xs:sequence>
-          <xs:element name="PP_CHI.1" minOccurs="0" maxOccurs="1"
-                      type="upf-PP_CHI.n"/>
-          <xs:element name="PP_CHI.2" minOccurs="0" maxOccurs="1"
-                      type="upf-PP_CHI.n"/>
+          <xs:element name="PP_CHI" minOccurs="0" maxOccurs="unbounded"
+                      type="upf-PP_CHI"/>
         </xs:sequence>
       </xs:complexType>
     </xs:element>
 
-  <xs:complexType name="upf-PP_CHI.n">
+  <xs:complexType name="upf-PP_CHI">
     <xs:annotation>
       <xs:documentation>
         An atomic wave function sampled on the radial grid.
@@ -840,6 +905,14 @@
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="upf-data-section">
+        <xs:attribute name="index" use="required" type="xs:integer">
+          <xs:annotation>
+            <xs:documentation>
+              The index enumerating PP_CHI, ranging from 1 to 
+              number_of_wfc.
+            </xs:documentation> 
+          </xs:annotation>
+        </xs:attribute>
         <xs:attribute name="l" use="required" type="xs:integer">
           <xs:annotation>
             <xs:documentation>
@@ -851,13 +924,6 @@
           <xs:annotation>
             <xs:documentation>
               Occupation of the wave function in the reference configuration.
-            </xs:documentation> 
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="index" use="optional" type="xs:integer">
-          <xs:annotation>
-            <xs:documentation>
-              The index n in PP_CHI.n
             </xs:documentation> 
           </xs:annotation>
         </xs:attribute>
@@ -930,15 +996,15 @@
       </xs:annotation>
       <xs:complexType>
         <xs:sequence>
-          <xs:element name="PP_RELWFC.1" minOccurs="0" maxOccurs="1"
-                      type="upf-PP_RELWFC.n"/>
-          <xs:element name="PP_RELBETA.1" minOccurs="0" maxOccurs="1"
-                      type="upf-PP_RELBETA.n"/>
+          <xs:element name="PP_RELWFC" minOccurs="0" maxOccurs="unbounded"
+                      type="upf-PP_RELWFC"/>
+          <xs:element name="PP_RELBETA" minOccurs="0" maxOccurs="unbounded"
+                      type="upf-PP_RELBETA"/>
         </xs:sequence>
       </xs:complexType>
   </xs:element>
 
-  <xs:complexType name="upf-PP_RELWFC.n">
+  <xs:complexType name="upf-PP_RELWFC">
     <xs:annotation>
       <xs:documentation>
         Contains data necessary to perform a spin-orbit self-consistent
@@ -951,18 +1017,18 @@
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="upf-data-section">
+        <xs:attribute name="index" use="required" type="xs:integer">
+          <xs:annotation>
+            <xs:documentation>
+              The index enumerating PP_RELWFC.
+            </xs:documentation> 
+          </xs:annotation>
+        </xs:attribute>
         <xs:attribute name="jchi" use="required" type="xs:double">
           <xs:annotation>
             <xs:documentation>
               Total angular momentum of the wave function,
               i.e. l+1/2, l-1/2 when l>0.
-            </xs:documentation> 
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="index" use="optional" type="xs:integer">
-          <xs:annotation>
-            <xs:documentation>
-              The index n in PP_RELWFC.n
             </xs:documentation> 
           </xs:annotation>
         </xs:attribute>
@@ -1002,7 +1068,7 @@
     </xs:complexContent>
   </xs:complexType>
 
-  <xs:complexType name="upf-PP_RELBETA.n">
+  <xs:complexType name="upf-PP_RELBETA">
     <xs:annotation>
       <xs:documentation>
         Contains data necessary to perform a spin-orbit self-consistent
@@ -1015,10 +1081,10 @@
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="upf-data-section">
-        <xs:attribute name="index" use="optional" type="xs:integer">
+        <xs:attribute name="index" use="required" type="xs:integer">
           <xs:annotation>
             <xs:documentation>
-              The index n in PP_RELBETA.n
+              The index enumerating PP_RELBETA
             </xs:documentation> 
           </xs:annotation>
         </xs:attribute>
@@ -1032,7 +1098,7 @@
         <xs:attribute name="lll" use="optional" type="xs:integer">
           <xs:annotation>
             <xs:documentation>
-              See attribute 'angular_momentum' or corresponding PP_BETA.n
+              See attribute 'angular_momentum' or corresponding PP_BETA
               subsection of PP_NONLOCAL (whose value is used as default).
             </xs:documentation> 
           </xs:annotation>
@@ -1059,10 +1125,10 @@
         <xs:element ref="PP_OCCUPATIONS"/>
         <xs:element ref="PP_AE_NLCC"/>
         <xs:element ref="PP_AE_VLOC"/>
-        <xs:element name="PP_AEWFC.1" minOccurs="0" maxOccurs="1"
-                    type="upf-PP_AEWFC.n"/>
-        <xs:element name="PP_PSWFC.1" minOccurs="0" maxOccurs="1"
-                    type="upf-PP_PSWFC.n"/>
+        <xs:element name="PP_AEWFC" minOccurs="0" maxOccurs="unbounded"
+                    type="upf-PP_AEWFC"/>
+        <xs:element name="PP_PSWFC" minOccurs="0" maxOccurs="unbounded"
+                    type="upf-PP_PSWFC"/>
       </xs:sequence>
       <xs:attribute name="core_energy" use="optional" type="xs:double"
                     default="0.0">
@@ -1134,7 +1200,7 @@
     </xs:annotation>
   </xs:element>
 
-  <xs:complexType name="upf-PP_AEWFC.n">
+  <xs:complexType name="upf-PP_AEWFC">
     <xs:annotation>
       <xs:documentation>
         Contains one all-electron orbital for each projector.
@@ -1153,9 +1219,8 @@
         <xs:attribute name="index" use="required" type="xs:integer">
           <xs:annotation>
             <xs:documentation>
-              UNDOCUMENTED
-
-              Maybe: The index n in PP_AEWFC.n
+              Index enumerating all-electron wave functions.
+              Ranges from 1 to number_of_proj.
             </xs:documentation> 
           </xs:annotation>
         </xs:attribute>
@@ -1181,7 +1246,7 @@
     </xs:complexContent>
   </xs:complexType>
 
-  <xs:complexType name="upf-PP_PSWFC.n">
+  <xs:complexType name="upf-PP_PSWFC">
     <xs:annotation>
       <xs:documentation>
         Contains one pseudo orbital for each projector.
@@ -1200,9 +1265,8 @@
         <xs:attribute name="index" use="required" type="xs:integer">
           <xs:annotation>
             <xs:documentation>
-              UNDOCUMENTED
-
-              Maybe: The index n in PP_PSWFC.n
+              Index enumerating pseudo wave functions.
+              Ranges from 1 to number_of_proj.
             </xs:documentation> 
           </xs:annotation>
         </xs:attribute>
@@ -1268,8 +1332,8 @@
     </xs:annotation>
     <xs:complexType>
       <xs:sequence>
-        <xs:element name="PP_GIPAW_CORE_ORBITAL.n" minOccurs="0" maxOccurs="1"
-                    type="upf-PP_AEWFC.n"/>
+        <xs:element name="PP_GIPAW_CORE_ORBITAL" minOccurs="0" maxOccurs="unbounded"
+                    type="upf-PP_GIPAW_CORE_ORBITAL"/>
       </xs:sequence>
       <xs:attribute name="number_of_core_orbitals" use="required" type="xs:integer">
         <xs:annotation>
@@ -1281,12 +1345,12 @@
     </xs:complexType>
   </xs:element>
 
-  <xs:complexType name="upf-GIPAW_CORE_ORBITAL.n">
+  <xs:complexType name="upf-PP_GIPAW_CORE_ORBITAL">
     <xs:annotation>
       <xs:documentation>
-        Contains all-electron orbital for particular projector.
+        Contains one all-electron core orbital.
 
-        The index n ranges from 1 to number_of_proj.
+        The index ranges from 1 to number_of_core_orbitals.
 
         Note: The orbitals are stored multiplied by a factor of r.
         I.e. their square module already contain the factor r^2 of
@@ -1297,12 +1361,11 @@
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="upf-data-section">
-        <xs:attribute name="index" use="optional" type="xs:integer">
+        <xs:attribute name="index" use="required" type="xs:integer">
           <xs:annotation>
             <xs:documentation>
-              UNDOCUMENTED
-
-              The index n in PP_GIPAW_CORE_ORBITAL.n
+              Index enumerating core orbitals.
+              Ranges from 1 to number_of_core_orbitals.
             </xs:documentation> 
           </xs:annotation>
         </xs:attribute>
@@ -1340,18 +1403,18 @@
     </xs:annotation>
     <xs:complexType>
       <xs:sequence>
-        <xs:element name="PP_GIPAW_ORBITAL.n" minOccurs="0" maxOccurs="1"
-                    type="upf-PP_AEWFC.n"/>
+        <xs:element name="PP_GIPAW_ORBITAL" minOccurs="0" maxOccurs="1"
+                    type="upf-PP_GIPAW_ORBITAL"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
 
-  <xs:complexType name="upf-GIPAW_ORBITAL.n">
+  <xs:complexType name="upf-PP_GIPAW_ORBITAL">
     <xs:annotation>
       <xs:documentation>
-        Contains all-electron orbital for particular projector.
+        Contains all-electron and pseudo wave functions
 
-        The index n ranges from 1 to number_of_proj.
+        The index n ranges from 1 to number_of_valence_orbitals.
 
         Note: The orbitals are stored multiplied by a factor of r.
         I.e. their square module already contain the factor r^2 of
@@ -1364,12 +1427,11 @@
        <xs:element ref="PP_GIPAW_ORBITAL_AE"/>
        <xs:element ref="PP_GIPAW_ORBITAL_PS"/>
      </xs:sequence>
-    <xs:attribute name="index" use="optional" type="xs:integer">
+    <xs:attribute name="index" use="required" type="xs:integer">
       <xs:annotation>
         <xs:documentation>
-          UNDOCUMENTED
-
-          The index n in PP_GIPAW_CORE_ORBITAL.n
+          Index enumerating core orbital.
+          Ranges from 1 to number_of_valence_orbitals.
         </xs:documentation> 
       </xs:annotation>
     </xs:attribute>
