@@ -3,7 +3,8 @@ upf-schema
 
 This is an XML schema definition for the Unified Pseudopotential Format v2.0.1
 of the Quantum Espresso suite as defined on the 
-[QE website](http://www.quantum-espresso.org/pseudopotentials/unified-pseudopotential-format/)
+[QE website](http://pseudopotentials.quantum-espresso.org/home/unified-pseudopotential-format)
+and [CECAM website](https://esl.cecam.org/data/upf/)
 
 Pseudopotential files can be validated by any standard XML validator.  Simply
 paste the content of the pseudopotential file and the schema [upf.xsd](upf.xsd)
